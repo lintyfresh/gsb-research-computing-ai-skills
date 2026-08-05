@@ -1,4 +1,38 @@
+{% comment %}
+  Theme resolution runs FIRST and inline (not deferred), before the browser
+  paints, so a reader who chose dark never sees a flash of the light theme.
+
+  This works because Just-the-Docs includes head_custom.html at the very end of
+  its own _includes/head.html, after the theme stylesheet link — so by the time
+  this runs, the link element exists and can still be rewritten pre-paint.
+
+  Keep it inline. Moving it to an external or deferred script reintroduces the flash.
+{% endcomment %}
+<script>
+(function () {
+  var KEY = 'dungeon.v1.theme';
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (_) { /* private mode / blocked */ }
+
+  var theme = (saved === 'light' || saved === 'dark')
+    ? saved
+    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+  document.documentElement.setAttribute('data-theme', theme);
+
+  // The theme stylesheet, not the head-nav one (which also matches
+  // "just-the-docs-" and is emitted immediately after it).
+  var link = document.querySelector(
+    'link[rel="stylesheet"][href*="/just-the-docs-"]:not(#jtd-head-nav-stylesheet)'
+  );
+  if (link) {
+    link.setAttribute('href', '{{ "/assets/css/just-the-docs-" | relative_url }}' + theme + '.css');
+  }
+})();
+</script>
+
 <link rel="stylesheet" href="{{ '/assets/css/dungeon.css' | relative_url }}">
+<script src="{{ '/assets/js/theme-toggle.js' | relative_url }}" defer></script>
 <script src="{{ '/assets/js/quest-log.js' | relative_url }}" defer></script>
 <script src="{{ '/assets/js/personalize.js' | relative_url }}" defer></script>
 <script src="{{ '/assets/js/party-reveal.js' | relative_url }}" defer></script>

@@ -1,5 +1,93 @@
 /* DARC Dungeon — theme overrides for RF Bootcamp 2026.
- * Sits on top of Just-the-Docs light; does not fight the theme. */
+ * Sits on top of Just-the-Docs; does not fight the theme. */
+
+/* ── Colour tokens ─────────────────────────────────────────────────────────
+ * Just-the-Docs is SCSS: it compiles to two separate stylesheets and exposes
+ * NO CSS custom properties at runtime. So the light/dark values for this
+ * file's own components have to be defined here, keyed off the data-theme
+ * attribute that assets/js/theme-toggle.js sets on <html>.
+ *
+ * The :root values below are the exact hex codes this file used before the
+ * toggle existed, so light mode is unchanged.
+ *
+ * Adding a colour? Add a token — do not hard-code a hex in a rule below, or it
+ * will be wrong in one of the two themes. Components that already read well on
+ * both (the quest-log button, the face-down party cards, the orange/yellow
+ * gradient badges) are intentionally left as literals. */
+:root {
+  --dg-panel-bg: #fff;
+  --dg-panel-border: #dde;
+  --dg-card-bg: #f8f9fa;
+  --dg-surface: #f3f4f7;
+  --dg-surface-border: #e1e4ea;
+  --dg-surface-hover: #e9ecf2;
+  --dg-text: #2c3e50;
+  --dg-muted: #6a7280;
+  --dg-muted-soft: #9aa0ab;
+  --dg-chip-bg: #eef1f8;
+  --dg-chip-border: #c7d0e4;
+  --dg-chip-text: #16203a;
+  --dg-aside-bg: #fafbfc;
+  --dg-aside-border: #dcdfe5;
+  --dg-banner-bg: #fdf6ea;
+  --dg-banner-border: #d9b477;
+  --dg-banner-text: #5b4a2f;
+  --dg-accent-warm: #8a5a12;
+  --dg-track: #eee;
+}
+
+html[data-theme="dark"] {
+  --dg-panel-bg: #1e2126;
+  --dg-panel-border: #363b44;
+  --dg-card-bg: #22262d;
+  --dg-surface: #24282f;
+  --dg-surface-border: #363b44;
+  --dg-surface-hover: #2c313a;
+  --dg-text: #e6e8ec;
+  --dg-muted: #9aa3b2;
+  --dg-muted-soft: #77808f;
+  --dg-chip-bg: #1a1f2b;
+  --dg-chip-border: #3b4557;
+  --dg-chip-text: #cfd8ea;
+  --dg-aside-bg: #1c1f24;
+  --dg-aside-border: #363b44;
+  --dg-banner-bg: #2a2317;
+  --dg-banner-border: #6b5836;
+  --dg-banner-text: #e8d9b8;
+  --dg-accent-warm: #d9b477;
+  --dg-track: #333;
+}
+
+/* ── Dark-mode toggle (site header, see _includes/header_custom.html) ────── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0.5rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--dg-surface);
+  color: var(--dg-text);
+  border: 1px solid var(--dg-surface-border);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.theme-toggle:hover { background: var(--dg-surface-hover); }
+.theme-toggle .theme-toggle-icon { font-size: 0.95em; }
+
+/* The header is tight on phones — keep the icon, drop the words. */
+@media (max-width: 50rem) {
+  .theme-toggle .theme-toggle-label {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
 
 /* ── Quest Log floating button (bottom-left; bot widget is bottom-right) ── */
 #quest-log-btn {
@@ -32,8 +120,8 @@
   position: absolute;
   bottom: calc(100% + 0.5rem);
   left: 0;
-  background: #fff;
-  border: 1px solid #dde;
+  background: var(--dg-panel-bg);
+  border: 1px solid var(--dg-panel-border);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   padding: 1rem 1.25rem;
@@ -43,7 +131,7 @@
 #quest-log-panel.open { display: block; }
 #quest-log-panel h4 { margin: 0 0 0.6rem; font-size: 14px; }
 #quest-log-panel ul { margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.9; }
-#quest-log-panel li span { float: right; color: #666; }
+#quest-log-panel li span { float: right; color: var(--dg-muted); }
 
 /* ── Quest checkbox labels ── */
 .quest-check {
@@ -51,7 +139,7 @@
   margin: 0.5rem 0 0.75rem;
   padding-left: 1.6em;
   font-style: italic;
-  color: #555;
+  color: var(--dg-muted);
   font-size: 0.9em;
 }
 .quest-check input[type="checkbox"] {
@@ -62,7 +150,7 @@
   margin-right: 0.5em;
   vertical-align: -0.12em;
 }
-.quest-check.done { text-decoration: line-through; color: #999; }
+.quest-check.done { text-decoration: line-through; color: var(--dg-muted-soft); }
 /* Inline code in a quest label renders upright (not italic) so it reads as a command */
 .quest-check code { font-style: normal; }
 
@@ -71,9 +159,9 @@
 .quest-sync-inline code.quest-cmd {
   font-size: 0.95em;
   padding: 0.2rem 0.45rem;
-  color: #16203a;              /* high-contrast command text */
-  background: #eef1f8;
-  border: 1px solid #c7d0e4;
+  color: var(--dg-chip-text);  /* high-contrast command text */
+  background: var(--dg-chip-bg);
+  border: 1px solid var(--dg-chip-border);
 }
 
 /* Sparkles float above the revealed line, so it needs a positioning context */
@@ -153,7 +241,7 @@ code.quest-cmd.cast-flash::before {
   100% { opacity: 0; transform: translateY(-26px) scale(1.15) rotate(200deg); }
 }
 
-.quest-cmd-hint { display: block; color: #6a7280; font-size: 1rem; margin-top: 0.45rem; }
+.quest-cmd-hint { display: block; color: var(--dg-muted); font-size: 1rem; margin-top: 0.45rem; }
 
 /* Respect reduced-motion: reveal everything instantly, no glow/caret/sparkles */
 @media (prefers-reduced-motion: reduce) {
@@ -170,13 +258,13 @@ code.quest-cmd.cast-flash::before {
   padding: 0.3rem 0.8rem;
   font-size: 0.95em;
   cursor: pointer;
-  border: 1px solid #cdd4e6;
+  border: 1px solid var(--dg-chip-border);
   border-radius: 6px;
-  background: #eef1f8;
-  color: #2c3e50;
+  background: var(--dg-chip-bg);
+  color: var(--dg-text);
   vertical-align: middle;
 }
-.quest-cmd-copy:hover { background: #dde3f2; }
+.quest-cmd-copy:hover { background: var(--dg-surface-hover); }
 
 /* ── Party reveal — face-down cards that flip to show one of us ──────────────
    Each card window is a crop of the single group illustration: the background
@@ -270,7 +358,7 @@ code.quest-cmd.cast-flash::before {
   font-size: 0.82em;
   line-height: 1.45;
 }
-.party-caption .party-unknown { color: #9aa0ab; letter-spacing: 0.15em; }
+.party-caption .party-unknown { color: var(--dg-muted-soft); letter-spacing: 0.15em; }
 .party-caption .party-known { display: none; }
 .party-card.revealed .party-caption .party-unknown { display: none; }
 .party-card.revealed .party-caption .party-known {
@@ -281,15 +369,15 @@ code.quest-cmd.cast-flash::before {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: none; }
 }
-.party-caption .party-name { display: block; font-weight: 700; color: #2c3e50; }
+.party-caption .party-name { display: block; font-weight: 700; color: var(--dg-text); }
 .party-caption .party-class {
   display: block;
   font-variant: small-caps;
   letter-spacing: 0.06em;
-  color: #8a5a12;
+  color: var(--dg-accent-warm);
 }
-.party-caption .party-item { display: block; font-style: italic; color: #6a7280; }
-.party-caption .party-role { display: block; color: #6a7280; }
+.party-caption .party-item { display: block; font-style: italic; color: var(--dg-muted); }
+.party-caption .party-role { display: block; color: var(--dg-muted); }
 
 /* Banner that appears once every card is face-up: first a prompt to tick the
    quest box, then a confirmation once it is ticked */
@@ -299,10 +387,10 @@ code.quest-cmd.cast-flash::before {
 .party-done {
   margin: 0.5rem 0 0;
   padding: 0.6rem 0.9rem;
-  border: 1px solid #d9b477;
+  border: 1px solid var(--dg-banner-border);
   border-radius: 8px;
-  background: #fdf6ea;
-  color: #5b4a2f;
+  background: var(--dg-banner-bg);
+  color: var(--dg-banner-text);
   font-size: 0.9em;
 }
 
@@ -329,23 +417,25 @@ code.quest-cmd.cast-flash::before {
 
 .floor-skills {
   font-size: 0.88em;
-  color: #666;
+  color: var(--dg-muted);
   line-height: 1.7;
 }
 
+/* These two previously read var(--border-color) / var(--sidebar-color), which
+   Just-the-Docs does not define — so they always silently used the fallback. */
 .floor-card {
-  border: 1px solid var(--border-color, #dde);
+  border: 1px solid var(--dg-panel-border);
   border-radius: 8px;
   padding: 1rem 1.2rem;
-  background: var(--sidebar-color, #f8f9fa);
+  background: var(--dg-card-bg);
 }
 .floor-card h3 { margin-top: 0; font-size: 1em; }
-.floor-card p { margin: 0.25rem 0 0; font-size: 0.88em; color: #555; }
+.floor-card p { margin: 0.25rem 0 0; font-size: 0.88em; color: var(--dg-muted); }
 
 /* ── Level display in quest log panel ── */
 #quest-level-display { margin-bottom: 0.7rem; }
-.level-title { font-weight: 700; font-size: 13px; color: #2c3e50; }
-.level-bar { background: #eee; border-radius: 999px; height: 6px; margin-top: 0.35rem; }
+.level-title { font-weight: 700; font-size: 13px; color: var(--dg-text); }
+.level-bar { background: var(--dg-track); border-radius: 999px; height: 6px; margin-top: 0.35rem; }
 .level-fill {
   background: linear-gradient(90deg, #e67e22, #f1c40f);
   border-radius: 999px; height: 6px; transition: width 0.4s ease; min-width: 3px;
@@ -389,7 +479,7 @@ code.quest-cmd.cast-flash::before {
    revealed content boxed beneath it. Scoped to .main-content so it never
    touches the quest-log panel's own UI. */
 .main-content details {
-  border: 1px solid #e1e4ea;
+  border: 1px solid var(--dg-surface-border);
   border-radius: 8px;
   margin: 0.9rem 0;
   overflow: hidden;              /* clips the summary bar to the rounded box */
@@ -400,8 +490,8 @@ code.quest-cmd.cast-flash::before {
   gap: 0.55rem;
   cursor: pointer;
   padding: 0.6rem 0.9rem;
-  background: #f3f4f7;
-  color: #2c3e50;
+  background: var(--dg-surface);
+  color: var(--dg-text);
   font-weight: 600;
   list-style: none;              /* drop the default disclosure triangle... */
 }
@@ -409,12 +499,12 @@ code.quest-cmd.cast-flash::before {
 .main-content details > summary::before {
   content: "\25b8";              /* ▸ our own chevron, rotates when open */
   display: inline-block;
-  color: #6a7280;
+  color: var(--dg-muted);
   transition: transform 0.15s ease;
 }
-.main-content details > summary:hover { background: #e9ecf2; }
+.main-content details > summary:hover { background: var(--dg-surface-hover); }
 .main-content details[open] > summary {
-  border-bottom: 1px solid #e1e4ea;
+  border-bottom: 1px solid var(--dg-surface-border);
   margin: 0 -0.9rem;             /* pull the bar back out to the box edges... */
 }
 .main-content details[open] > summary::before { transform: rotate(90deg); }
@@ -428,9 +518,9 @@ code.quest-cmd.cast-flash::before {
    it rather than competing with the callouts that carry instructions. */
 .main-content blockquote.aside,
 .main-content p.aside {
-  border-color: #dcdfe5;
-  border-left-color: #6a7280;    /* the same muted grey as the SVG labels */
-  background: #fafbfc;
+  border-color: var(--dg-aside-border);
+  border-left-color: var(--dg-muted);  /* the same muted grey as the SVG labels */
+  background: var(--dg-aside-bg);
 }
 .main-content blockquote.aside::before,
-.main-content p.aside::before { color: #6a7280; }
+.main-content p.aside::before { color: var(--dg-muted); }

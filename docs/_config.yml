@@ -23,7 +23,11 @@ exclude:
 
 # Theme (use the gem directly — we're not on the legacy github-pages stack)
 theme: just-the-docs
-color_scheme: dark
+# Baseline scheme, compiled into just-the-docs-default.css. This is what a
+# reader sees only if JavaScript is off — the toggle (assets/js/theme-toggle.js)
+# swaps the stylesheet to just-the-docs-light.css or -dark.css on every load.
+# Keep this `light`: dungeon.css's default tokens are the light palette.
+color_scheme: light
 search_enabled: true
 heading_anchors: true
 
