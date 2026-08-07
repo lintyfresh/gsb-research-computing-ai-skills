@@ -3,8 +3,12 @@
 # The serial baseline from Day 3: one Slurm job, one core, a for loop.
 # The loop can't start filing 2 until filing 1 is done.
 #
-# Run from the repo root (needs .env for the API key):  sbatch .instructor/parallelization_demos/1_one_job_one_core.slurm
+# Run from the repo root — that's where .env lives, and the log paths below are
+# relative to wherever you submit from. Slurm won't create logs/ for you; it
+# fails the job outright if the directory is missing.
+#   mkdir -p logs && sbatch .instructor/parallelization_demos/1_one_job_one_core.slurm
 #SBATCH --job-name=demo-one-job-one-core
+#SBATCH --partition=normal
 #SBATCH --output=logs/demo1_%j.out
 #SBATCH --error=logs/demo1_%j.err
 #SBATCH --time=00:10:00

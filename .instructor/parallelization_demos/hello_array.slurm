@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --array=1-4                     # the new line, which says: run this script 4 times
 
-# slurm/hello.slurm with one directive added. That single line turns one
+# hello.slurm alongside it, with one directive added. That single line turns one
 # submission into four independent tasks, identical except for the task ID
 # each one is handed. See Slurm Job Arrays.
 #
@@ -21,7 +21,7 @@
 #
 # Run from the repo root:
 #     mkdir -p logs
-#     sbatch slurm/hello_array.slurm
+#     sbatch .instructor/parallelization_demos/hello_array.slurm
 #     cat logs/hello_<arrayid>_*.out
 cd $HOME/gsb-research-computing-ai-skills
 

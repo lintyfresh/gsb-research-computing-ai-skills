@@ -116,12 +116,12 @@ The task number is what makes this general. Every task runs the identical script
 
 ## Exercise
 
-Now over to you. Your job is the following: process and extract information from 100 SEC filings using a job array. The filings are hosted online, and `data/aws_links.csv` — already in your cloned repo, alongside `scripts/` and `slurm/` — provides the URLs of all of them for you to query.
+Now over to you. Your job is the following: process and extract information from 100 SEC filings using a job array. The filings are hosted online, and their URLs are in `data/aws_links.csv` — the same file your Day 3 batch script read, already in your cloned repo.
 
 You'll end up with two files: a new Python script that handles a single filing, and a Slurm script to launch it as an array — either a new one, or the `slurm/extract_form_3_batch.slurm` you wrote on Day 3, adapted.
 
 {: .note }
-> **Use `gemini-2.5-flash-lite` here, not Day 2's `gpt-5.2`.** Day 2's rule was *iterate cheap, then spend where it counts*. Here the arithmetic flips: the same call runs a hundred times, and cost and speed are now the thing you're managing. You get the rougher model in exchange, and handling that is part of the rest of today's work.
+> **Why this runs on `gemini-2.5-flash`.** Day 2 finished on the stronger `gpt-5.2`, following the rule *iterate cheap, then spend where it counts*. Day 3's batch script went back to the cheap model, and stays there today — because at a hundred filings the arithmetic flips: the same call runs a hundred times, so cost and speed become the thing you're managing. You get the rougher model in exchange, and handling that is part of the rest of today's work.
 
 Work through it in four steps.
 
@@ -150,7 +150,14 @@ Work through it in four steps.
 Every task runs the same script and differs only in its task ID, so the script can do the lookup itself — read the filings out of `data/aws_links.csv` and take the one matching this task:
 
 ```python
+import os
 import sys
+
+# Same pin as the Day 3 batch script, and it has to come before pandas is
+# imported — see the note below for why an array makes it matter more.
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+
 import pandas as pd
 
 task_id = int(sys.argv[1])                      # handed over by the array script
@@ -169,14 +176,17 @@ That `- 1` is the off-by-one from the warning above: the tasks count from 1, the
 
 </details>
 
+{: .note }
+> **Keep the thread pin, and mean it here.** [Day 3](../../day3/profiling/) had you set `OPENBLAS_NUM_THREADS=1` so pandas' math libraries wouldn't grab every core on a shared node. That was one script against your own CPU limit. An array runs a hundred of them at once, each free to spawn a thread per core — so the same two lines are doing considerably more work now than they were when you first wrote them. They only take effect if they run *before* `import pandas`, which is why they sit at the very top.
+
 **2. Given a filing, write the usual extraction code.** Nothing new here — fetch the filing, send it to the API, validate the response with your Pydantic model. It's the same logic you wrote on Day 2 and looped over on Day 3, except there's no loop: this task handles exactly one filing.
 
 <details markdown="1">
 <summary>💡 Hint — the extraction code, ready to copy</summary>
 
-This is the script you wrote on Day 2, `scripts/extract_form_3_one_file.py`, with two changes.
+This is `scripts/extract_form_3_batch.py` — the script you profiled and scaled to 100 filings on Day 3 — with the loop taken out.
 
-It fetches the filing over the network rather than reading a fixed path off disk, since step 1 gives you a URL. And it calls `gemini-2.5-flash-lite` rather than the `gpt-5.2`.
+That really is the whole change. Day 3's version read `aws_links.csv` itself and looped over every filing in turn; here step 1 has already used the task ID to pick your one filing out of that same CSV, so what's left is the body of that loop and nothing else. Same model, same schema, same prompt, same fetch over the network. **The array is what replaces the loop** — a hundred copies of this running side by side, instead of one copy going round a hundred times.
 
 ```python
 import json
@@ -221,7 +231,7 @@ Return a SINGLE JSON object, not a list. Do not wrap it in an array.
 filing_text = requests.get(filing).text
 
 api_response = client.chat.completions.create(
-    model="gemini-2.5-flash-lite",
+    model="gemini-2.5-flash",
     response_format={"type": "json_object"},
     messages=[
         {"role": "system", "content": system_prompt},
@@ -243,6 +253,8 @@ result = Form3Filing.model_validate_json(api_response.choices[0].message.content
 Name it after the filing, the way the Day 3 batch script does:
 
 ```python
+from pathlib import Path
+
 name = filing.split("/")[-1].replace(".txt", ".json")
 output_path = Path("results") / name         # results/0000003570-22-000041.json
 ```
@@ -265,7 +277,10 @@ sbatch slurm/extract_array.slurm
 watch squeue --me
 ```
 
-The new thing to notice is the job IDs: an array shows up as many rows sharing one ID, with a task number after it — `12345678_1`, `12345678_2`, and so on — each moving through the same `PD` → `R` → gone lifecycle you watched on [Day 3](../../day3/slurm-scheduler/). Once it's done, check the per-task logs in `logs/` and the results in `results/`.
+The new thing to notice is the job IDs: an array shows up as many rows sharing one ID, with a task number after it. So if `sbatch` printed job `12345678`, its tasks appear as `12345678_1`, `12345678_2`, and so on — that number is just an example, yours will be different. Each task moves through the same `PD` → `R` → gone lifecycle you watched on [Day 3](../../day3/slurm-scheduler/). Once it's done, check the per-task logs in `logs/` and the results in `results/`.
+
+{: .note }
+> Remember to apply a 🟢 green sticky note when you're done, and a 🔴 red sticky note if you need help.
 
 <label class="quest-check"><input type="checkbox" data-room="d4-slurm-arrays" data-key="exercise"> I submitted a job array, watched the tasks run in `squeue`, and confirmed it finished with one result file per filing</label>
 

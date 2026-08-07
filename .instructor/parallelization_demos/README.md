@@ -15,7 +15,24 @@ Day 3 batch job — varying only *how* the work is spread.
 The scripts illustrate the *shape* of each approach; the filing count is a
 knob, not a fixed part of the demo.
 
-Two helpers sit alongside them, both following the conventions of
+Two smaller scripts sit alongside them, for the
+["Slurm Job Arrays"](../../docs/day4/slurm-arrays.md) page rather than this one.
+They do no real work — the only thing on show is the shape of a submission, and
+the single directive that turns one job into four:
+
+| Script | On the page |
+|---|---|
+| `hello.slurm` | the first `.demo` callout — one script, one task |
+| `hello_array.slurm` | the second — the same script plus `#SBATCH --array=1-4` |
+
+```bash
+mkdir -p logs
+sbatch .instructor/parallelization_demos/hello.slurm
+sbatch .instructor/parallelization_demos/hello_array.slurm
+cat logs/hello_<arrayid>_*.out       # one file per task, via %A_%a
+```
+
+Two helpers sit alongside them too, both following the conventions of
 `scripts/extract_form_3_batch.py`:
 
 | Helper | Role |
@@ -40,6 +57,27 @@ sbatch .instructor/parallelization_demos/1_one_job_one_core.slurm
 All four demos process the same **20 filings**, so their timings are directly
 comparable — set once as `NUM_FILINGS` in `make_url_list.py`. That is 20 paid API
 calls per demo, so budget 80 for a full four-way comparison.
+
+All four submit to **`normal`**, and it has to be `normal` rather than `dev`.
+`dev` is the natural first thought — short jobs, fast turnaround, and Day 3
+introduces it as a side quest (`docs/day3/slurm-job.md:520`) — but it caps a user
+at **2 CPUs**, per RCpedia's [partition
+limits](https://rcpedia.stanford.edu/_user_guide/slurm/#current-partitions-and-their-limits):
+
+| Partition | CPU limit per user | Memory | Time limit (default) |
+|---|---|---|---|
+| `normal` | 512 | 3000 GB | 2 days (2 h) |
+| `dev` | **2** | 46 GB | 2 h (1 h) |
+
+Against that cap, demo 4 needs 4 CPUs at once (2 jobs × 2 cores) and simply
+cannot run in parallel: Slurm would run its two jobs one after the other, so the
+demo built to show the *most* parallelism would post the *worst* wall-clock. It
+would not error — it would just quietly invert the lesson. Demo 3 needs exactly
+2 and would fit with no headroom, so anything else of yours on `dev` tips it
+over too.
+
+Time and memory were never the constraint: 10 minutes against a 2-hour ceiling,
+4 GB against 46.
 
 Expect well under a minute for the serial baseline (Day 3 measured ~2.25s per
 filing), and less for the rest.

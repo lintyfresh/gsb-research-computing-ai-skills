@@ -19,7 +19,7 @@ Day 4 scales yesterday's single Slurm job into a full research pipeline. You'll 
 ## Day 3 Recap
 
 - Profiled the extraction script to measure its real time and memory needs
-- Wrote and submitted `slurm/extract_form_3_one_file.slurm` as a batch job, with `#SBATCH` directives grounded in those measurements
+- Wrote and submitted `slurm/extract_form_3_batch.slurm` as a batch job, with `#SBATCH` directives grounded in those measurements
 - Monitored the job with `squeue` and `sacct`, and documented the pipeline in `README.md`
 
 Any questions about Day 1–3 before we move on?

@@ -4,8 +4,12 @@
 # reserves 2 cores and fans its slice out across them with xargs -P
 # (parallel within each job).
 #
-# Run from the repo root (needs .env for the API key):  sbatch .instructor/parallelization_demos/4_many_jobs_many_cores.slurm
+# Run from the repo root — that's where .env lives, and the log paths below are
+# relative to wherever you submit from. Slurm won't create logs/ for you; it
+# fails the job outright if the directory is missing.
+#   mkdir -p logs && sbatch .instructor/parallelization_demos/4_many_jobs_many_cores.slurm
 #SBATCH --job-name=demo-many-jobs-many-cores
+#SBATCH --partition=normal
 #SBATCH --output=logs/demo4_%A_%a.out
 #SBATCH --error=logs/demo4_%A_%a.err
 #SBATCH --time=00:10:00

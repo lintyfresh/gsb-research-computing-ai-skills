@@ -8,9 +8,11 @@ permalink: /day4/staying-in-touch/
 
 # Staying In Touch
 
-Thank you for participating!
+Thank you for participating! Now that the course is done, we'd love your feedback on how it went and what we can improve for future runs.
 
-The DARC team runs the Yens and supports GSB researchers year-round. You are not expected to remember everything from this week — but you are expected to know where to ask.
+**Please fill out the course survey: [darc.stanford.edu/class-survey](http://darc.stanford.edu/class-survey)**
+
+Also, note that the DARC team runs the Yens and supports GSB researchers year-round. You are not expected to remember everything from this week — but you are expected to know where to ask.
 
 ## Slack — `#gsb-yen-users`
 

@@ -2,7 +2,14 @@
 # Start the shared Ollama server for the Day 4 demo, and make sure the model is
 # cached. Normally run this on a GPU node — grab one first with, e.g.:
 #
-#     srun -p gpu -G 1 -C "GPU_MODEL:A40" -n 1 -t 4:00:00 --pty /bin/bash
+#     RESERVATION=class_day4   # the Day 4 teaching reservation (H200 capacity)
+#     srun -p gpu -G 1 --reservation="$RESERVATION" -n 1 -t 4:00:00 --pty /bin/bash
+#
+# Drop --reservation outside the reserved window — the name only resolves while
+# the reservation is active, and srun refuses the allocation otherwise. No
+# -C "GPU_MODEL:..." here on purpose: the reservation already picks the node, and
+# a card-model filter on top can only exclude it. Add one when you are on the
+# open queue instead.
 #
 # It also runs without a GPU, which is worth demonstrating: same server, same
 # queries, answers arriving a word at a time. The script warns and continues.

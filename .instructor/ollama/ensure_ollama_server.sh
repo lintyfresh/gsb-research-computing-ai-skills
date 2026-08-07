@@ -5,6 +5,10 @@
 #
 #     bash .instructor/ollama/ensure_ollama_server.sh
 #
+# In practice run one of the two wrappers instead — ensure_ollama_gpu.sh or
+# ensure_ollama_cpu.sh — which are this script with the right settings already
+# filled in. See the partition note below.
+#
 # Idempotent and safe to re-run: if a healthy server is already answering it
 # prints the URL and exits without submitting anything. Otherwise it submits
 # start_ollama_server.sh to the GPU partition and waits for it to answer.
@@ -15,6 +19,8 @@
 #
 # Environment overrides:
 #   WALLTIME=4:00:00      how long the server should live; see the note below
+#   RESERVATION=class_day4  the teaching reservation; the default, pass
+#                         RESERVATION= to use the open queue instead
 #   CONSTRAINT=...        which cards are eligible; see the default below
 #   CPUS=8                cores for the server; matters a lot on CPU, see below
 #   MODEL=llama3.2:1b     passed through to the server script
@@ -55,17 +61,21 @@ JOB_NAME="${JOB_NAME:-ollama-server}"
 
 # Partition and GPU count are overridable so the same script can stand up the
 # CPU contrast server alongside the GPU one — same image, same model, same
-# queries, answers arriving a word at a time. To run both at once:
+# queries, answers arriving a word at a time.
 #
-#     bash ensure_ollama_server.sh                      # the GPU server
-#     SCRATCH_BASE=/scratch/users/$USER/cpu \
-#     JOB_NAME=ollama-cpu PARTITION=normal GPUS=0 \
-#       bash ensure_ollama_server.sh                    # the CPU one
+# You do not have to assemble those overrides by hand. Two wrappers next to this
+# file do it, and they are what you should normally run:
 #
-# The separate SCRATCH_BASE is not optional. ollama.sh keeps port.txt, host.txt
-# and models under a single ${SCRATCH_BASE}/ollama, so two servers sharing one
-# would overwrite each other's coordinates and you would lose track of the first.
-# The cost is that the second tree re-downloads the ~2 GB of weights.
+#     bash .instructor/ollama/ensure_ollama_gpu.sh      # the GPU server
+#     bash .instructor/ollama/ensure_ollama_cpu.sh      # the CPU one
+#
+# Run both, in either order, for the speed contrast. They are independent jobs.
+#
+# The CPU wrapper points SCRATCH_BASE at a separate tree, and that is not
+# optional. ollama.sh keeps port.txt, host.txt and models under a single
+# ${SCRATCH_BASE}/ollama, so two servers sharing one would overwrite each other's
+# coordinates and you would lose track of the first. The cost is that the second
+# tree re-downloads the ~2 GB of weights.
 #
 # --nv stays hardcoded in ollama.sh even with GPUS=0; on a CPU node Apptainer
 # prints "Could not find any nv files on this host!" and continues (verified on
@@ -97,12 +107,25 @@ CPUS="${CPUS:-8}"
 # has to span the gap *and* the session (e.g. WALLTIME=15:00:00 for a 9pm
 # submission), which is still inside the gpu partition's 1-day cap.
 WALLTIME="${WALLTIME:-4:00:00}"
-# Stay off yen-gpu4. It holds the only two H200s (141 GiB each) — the scarcest
-# hardware on the cluster and what colleagues with genuinely large models need.
-# llama3.2:1b is ~1.3 GB quantised and fits comfortably on an A30, so pinning the
-# demo to the big card would be pure waste. This still leaves 12 of the 14 GPUs
-# eligible, so it costs little queue time. Set CONSTRAINT= to allow any node.
-CONSTRAINT="${CONSTRAINT-GPU_MODEL:A30|GPU_MODEL:A40}"
+# No GPU-model constraint by default. This used to pin the demo to A30/A40 to
+# keep it off the scarce H200s, but the class reservation below *is* H200
+# capacity, so the old default would have excluded the very node held for us and
+# left the job pending against nothing. The reservation now does the node
+# selection, and asking for a card model on top only narrows it further.
+#
+# Set CONSTRAINT="GPU_MODEL:A30|GPU_MODEL:A40" (or similar) if you are running
+# without a reservation on the open queue, where staying off the big cards is
+# still the courteous default — llama3.2:1b is ~1.3 GB quantised and does not
+# need 141 GiB of VRAM.
+CONSTRAINT="${CONSTRAINT-}"
+
+# The teaching reservation, which holds GPU capacity aside for the class so the
+# demo server does not queue behind whatever else is on the cluster that
+# morning. `class_day4` is the Day 4 window. Outside it the name does not
+# resolve and sbatch refuses the job ("Access denied to reservation"), so run
+# with RESERVATION= to submit to the open queue instead — a dry run the week
+# before, say. Bare `-` rather than `:-` so an explicit empty value wins.
+RESERVATION="${RESERVATION-class_day4}"
 MODEL="${MODEL:-llama3.2:1b}"
 WAIT_SECONDS="${WAIT_SECONDS:-1800}"   # covers a cold image+model pull, and queueing
 
@@ -165,14 +188,18 @@ else
           --output="${COORD_DIR}/slurm-%j.out")
   # The GPU-model constraint only means anything when we are asking for a GPU;
   # applying it to a `normal` node would make the job unschedulable outright.
+  # The reservation goes the same way and for the same reason: class_day4 holds
+  # GPU nodes, so a GPUS=0 job asking for it would never be scheduled — which
+  # matters because the CPU contrast server in the header is exactly that job.
   if [ "$GPUS" -gt 0 ]; then
     submit+=(--gpus="$GPUS")
     [ -n "$CONSTRAINT" ] && submit+=(--constraint="$CONSTRAINT")
+    [ -n "$RESERVATION" ] && submit+=(--reservation="$RESERVATION")
   fi
 
   # `bash -l` so the module system (and therefore `ml apptainer`) is defined.
   jobid=$(MODEL="$MODEL" "${submit[@]}" --wrap="MODEL='$MODEL' bash -l '$SERVER_SCRIPT'")
-  echo "Submitted job $jobid to the $PARTITION partition (walltime $WALLTIME, GPUs: $GPUS)."
+  echo "Submitted job $jobid to the $PARTITION partition (walltime $WALLTIME, GPUs: $GPUS${RESERVATION:+, reservation $RESERVATION})."
 fi
 
 # --- wait for it to answer --------------------------------------------------

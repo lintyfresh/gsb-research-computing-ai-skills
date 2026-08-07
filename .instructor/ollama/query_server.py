@@ -5,7 +5,7 @@ Ready to run on the Yens once a server is up:
 
     python .instructor/ollama/query_server.py
     python .instructor/ollama/query_server.py "What is an SEC Form 3 filing?"
-    python .instructor/ollama/query_server.py --url http://yen-gpu1:41234 "..."
+    python .instructor/ollama/query_server.py --url http://yen-gpu1:41234/v1 "..."
 
 With no --url it reads the coordinates that ollama.sh writes under
 $SCRATCH_BASE/ollama/, so it finds your own server without being told. Those
@@ -57,17 +57,24 @@ def url_from_scratch() -> str:
     if not (host_file.is_file() and port_file.is_file()):
         sys.exit(
             f"No server coordinates in {coord_dir}. Either start one with\n"
-            f"  bash .instructor/ollama/ensure_ollama_server.sh\n"
+            f"  bash .instructor/ollama/ensure_ollama_gpu.sh   (or ensure_ollama_cpu.sh)\n"
             f"or pass the URL explicitly with --url."
         )
 
-    return f"http://{host_file.read_text().strip()}:{port_file.read_text().strip()}"
+    # The coordinate files hold only host and port, so the OpenAI-compatible
+    # path is added here. This is the one place that happens: a URL given with
+    # --url is passed through untouched.
+    return f"http://{host_file.read_text().strip()}:{port_file.read_text().strip()}/v1"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("query", nargs="?", default=DEFAULT_QUERY)
-    parser.add_argument("--url", help="server URL, e.g. http://yen-gpu1:41234")
+    parser.add_argument(
+        "--url",
+        help="full base URL including /v1, e.g. http://yen-gpu1:41234/v1 — "
+             "the Python form the server banner prints, used as given",
+    )
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument(
         "--max-tokens",
@@ -83,8 +90,8 @@ def main() -> None:
     print(f"Query:   {args.query}\n")
 
     client = OpenAI(
-        base_url=f"{base_url}/v1",   # the model server on the Yens
-        api_key="ollama",            # ignored, but the client requires a value
+        base_url=base_url,   # used exactly as given; see --url below
+        api_key="ollama",    # ignored, but the client requires a value
     )
 
     started = time.perf_counter()

@@ -68,6 +68,9 @@ print(response.choices[0].message.content)
 {: .note }
 > The interface to the local LLM is **OpenAI-compatible**, so this is effectively the *same* code you used for the Stanford AI API Gateway on Day 2 — only the `base_url` changes.
 
+{: .note }
+> Remember to apply a 🟢 green sticky note when you're done, and a 🔴 red sticky note if you need help.
+
 {: .warning }
 > This only works while the server is running. To use a local LLM in the future, you'll have to set one up yourself.
 
@@ -169,7 +172,7 @@ You request a GPU the same way you set any other resource in a Slurm script — 
 Just like the `#SBATCH` directives you wrote on Day 3, this tells the scheduler what your job needs — here, one GPU. Match the partition name (and any specific-node targeting) to your cluster's current setup.
 
 {: .tip }
-> **For interactive work** — exploring, pulling a model, quick tests — you don't need a batch script. Grab a GPU node directly with `srun --pty`, the same command you used for a CPU allocation on [Day 3](../../day3/ticket-rail/), plus the GPU flags:
+> **For interactive work** — exploring, pulling a model, quick tests — you don't need a batch script. Grab a GPU node directly with `srun --pty`, the same command you used for a CPU allocation on [Day 3](../../day3/slurm-job/), plus the GPU flags:
 >
 > ```bash
 > srun --partition=gpu --gres=gpu:1 --cpus-per-task=4 --mem=16G --time=01:00:00 --pty bash

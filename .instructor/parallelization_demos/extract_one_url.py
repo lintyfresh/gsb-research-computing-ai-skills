@@ -1,8 +1,9 @@
 """Extract structured fields from one SEC Form 3 filing, fetched by URL.
 
 Same conventions as scripts/extract_form_3_batch.py — the S3 URLs from
-data/aws_links.csv, requests.get to fetch, the same schema, prompt, and model —
-but one filing per invocation instead of a for loop. That is what lets the demo
+data/aws_links.csv, requests.get to fetch, the same schema and prompt — but one
+filing per invocation instead of a for loop. (The model differs for now: see the
+note at the call site.) That is what lets the demo
 scripts fan the work out, whether across cores (xargs -P) or across array tasks.
 
     python .instructor/parallelization_demos/extract_one_url.py <filing_url> <output_path>
@@ -62,8 +63,10 @@ def main():
     filing_text = requests.get(filing_url).text
 
     response = client.chat.completions.create(
-        # Day 2's model. Temporary: this key can't reach gpt-4o-mini.
-        model="gemini-2.5-flash-lite",
+        # Temporary: this key can't reach gpt-4o-mini, and the gateway's
+        # gemini-2.5-flash-lite deployment is in cooldown (429, "no deployments
+        # available"). flash is the same family and is serving.
+        model="gemini-2.5-flash",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},

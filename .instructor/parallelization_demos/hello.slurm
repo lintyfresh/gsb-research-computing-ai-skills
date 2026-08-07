@@ -9,7 +9,8 @@
 
 # One script, one task — the baseline for the array demo on Slurm Job Arrays.
 # Stripped of real work so the only thing on show is the shape of a submission.
-# Pairs with slurm/hello_array.slurm, which is this script plus one directive.
+# Pairs with hello_array.slurm alongside it, which is this script plus one
+# directive.
 #
 # Slurm resolves --output/--error when the job is submitted, relative to the
 # directory you ran sbatch from — so logs/ must already exist there. The cd
@@ -17,7 +18,7 @@
 #
 # Run from the repo root:
 #     mkdir -p logs
-#     sbatch slurm/hello.slurm
+#     sbatch .instructor/parallelization_demos/hello.slurm
 #     cat logs/hello_<jobid>.out
 cd $HOME/gsb-research-computing-ai-skills
 

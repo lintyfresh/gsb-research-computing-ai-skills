@@ -19,7 +19,7 @@ This capstone combines everything from the week into one pipeline — all at onc
 **1. Process *every* filing with a job array.**
 In [Slurm Job Arrays](../slurm-arrays/) you ran 100 filings through an array, one filing per task. Now do all of them: `data/aws_links.csv` lists **992**.
 
-Keep using `gemini-2.5-flash-lite` through the Stanford AI API Gateway, and build on the `scripts/extract_array.py` and `slurm/extract_array.slurm` you already wrote.
+Keep using `gemini-2.5-flash` through the Stanford AI API Gateway, and build on the `scripts/extract_array.py` and `slurm/extract_array.slurm` you already wrote.
 
 The catch is that the Yens cap a job array at **512 tasks** — see for yourself:
 
@@ -45,6 +45,9 @@ Keep adding to the same `README.md` you've been building since Day 1 — the one
 Ask Claude Code to handle it:
 
 > Add and commit my array script and my README changes — not the extracted data — with a message like "Day 4 Challenge: all 992 filings", then push to my fork.
+
+{: .note }
+> Remember to apply a 🟢 green sticky note when you're done, and a 🔴 red sticky note if you need help.
 
 <label class="quest-check"><input type="checkbox" data-room="d4-capstone" data-key="commit"> Completed the deliverables and pushed to GitHub</label>
 

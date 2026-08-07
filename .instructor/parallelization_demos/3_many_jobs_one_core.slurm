@@ -5,8 +5,12 @@
 # filings serially on a single core. Parallelism across jobs: Slurm splits
 # the work by task ID.
 #
-# Run from the repo root (needs .env for the API key):  sbatch .instructor/parallelization_demos/3_many_jobs_one_core.slurm
+# Run from the repo root — that's where .env lives, and the log paths below are
+# relative to wherever you submit from. Slurm won't create logs/ for you; it
+# fails the job outright if the directory is missing.
+#   mkdir -p logs && sbatch .instructor/parallelization_demos/3_many_jobs_one_core.slurm
 #SBATCH --job-name=demo-many-jobs-one-core
+#SBATCH --partition=normal
 #SBATCH --output=logs/demo3_%A_%a.out
 #SBATCH --error=logs/demo3_%A_%a.err
 #SBATCH --time=00:10:00

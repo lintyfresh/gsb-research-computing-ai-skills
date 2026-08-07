@@ -70,8 +70,7 @@ for idx, filing_url in enumerate(urls, 1):
     filing_text = response.text
 
     api_response = client.chat.completions.create(
-        # Day 2's model. Temporary: this key can't reach gpt-4o-mini.
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": system_prompt},
