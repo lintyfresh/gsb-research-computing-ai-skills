@@ -24,9 +24,9 @@ CSV_PATH = "data/aws_links.csv"
 RESULTS_DIR = "results"
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
-# How many filings to process. Kept small on purpose: every filing is a paid API
-# call, so a stray run shouldn't fire hundreds.
-NUM_FILINGS = 10
+# How many filings to process. Every filing is a paid API call, so raise this
+# deliberately -- 100 filings is 100 calls.
+NUM_FILINGS = 100
 
 
 class Form3Filing(BaseModel):
