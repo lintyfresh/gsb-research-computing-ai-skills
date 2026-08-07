@@ -18,3 +18,13 @@ A four-day hands-on course covering the command line, the Yens cluster, SLURM, G
 | **Day 2** | Python & AI tools | JupyterHub · Python envs & reproducible venvs · AI Playground · Secure key management · Pydantic · LLM-as-a-judge · AI agents & data privacy |
 | **Day 3** | Cluster computing | SLURM · Resource estimation · Job lifecycle · Job monitoring |
 | **Day 4** | Parallelization & local LLMs | Parallelization · Job arrays · Local LLMs on cluster hardware · GPU vs CPU · LLM failure modes & validation |
+
+## Resource Profile
+
+### extract_form_3_batch.py — 10 filings
+
+- Yen node used: Yen4
+- Wall-clock time (real): 6 s
+- CPU cores used: 1
+- RAM used (RES from htop, or % Mem from userload): 1gb
+- Serial or parallel: serial
